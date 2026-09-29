@@ -730,21 +730,26 @@
             renderApp();
         }
 
+        /* --- دالة تصدير ملف إكسل المنظمة والمرتبة --- */
         function exportToExcel() {
             if (!checkUnnamedCustomersWithSales()) return;
 
             if (typeof XLSX === 'undefined') {
-                alert('لتصدير ملف Excel يتطلب اتصال ""بالإنترنت لتحميل المكتبة.');
+                alert('لتصدير ملف Excel يتطلب اتصال بالإنترنت لتحميل المكتبة.');
                 return;
             }
+
             let excelRows = [];
-            let headerRow = ['الصنف / الحجم', 'سعر القطعة'];
+            
+            // 1. صف العناوين الرئيسية
+            let headerRow = ['الصنف / الحجم', 'سعر القطعة (ج)'];
             for (let c = 1; c <= customersCount; c++) {
-                const name = customerNames[c] ? `${customerNames[c]}` : `عميل ${c}`;
-                headerRow.push(`${name} (عدد)`);
+                const name = customerNames[c] ? `${customerNames[c].trim()} (${c})` : `عميل ${c}`;
+                headerRow.push(name);
             }
             excelRows.push(headerRow);
 
+            // 2. صفوف الأصناف والأسعار والمبيعات
             products.forEach((prod, pIdx) => {
                 const price = Number(priceData[pIdx]) || 0;
                 let row = [`${prod.cat} (${prod.size})`, price];
@@ -755,7 +760,8 @@
                 excelRows.push(row);
             });
 
-            let totalRow = ['الإجمالي المالي (جنيه)', '-'];
+            // 3. صف إجمالي مبيعات كل عميل
+            let totalRow = ['إجمالي العميل (جنيه)', '-'];
             let grandTotal = 0;
             for (let c = 1; c <= customersCount; c++) {
                 let sum = 0;
@@ -769,12 +775,33 @@
             }
             excelRows.push(totalRow);
             
-            // إضافة صف للإجمالي الكلي في شيت الإكسل
-            excelRows.push(['إجمالي اليومية الكلي', grandTotal]);
+            // 4. صف إجمالي اليومية الكلي المجمع
+            excelRows.push(['إجمالي المبيعات الكلي (جنيه)', grandTotal]);
 
+            // إنشاء ورقة العمل
             const ws = XLSX.utils.aoa_to_sheet(excelRows);
+
+            // تفعيل الاتجاه من اليمين إلى اليسار (RTL) لسهولة القراءة بأسلوب سلس
+            if (!ws['!views']) ws['!views'] = [];
+            ws['!views'].push({ RTL: true });
+
+            // ضبط عرض الأعمدة تلقائياً ليكون مريحاً ومناسباً لكل المحتويات
+            const colWidths = excelRows[0].map((_, colIndex) => {
+                let maxLen = 12; // الحد الأدنى لعرض العمود
+                excelRows.forEach(row => {
+                    const val = row[colIndex] !== undefined ? String(row[colIndex]) : '';
+                    if (val.length > maxLen) {
+                        maxLen = val.length;
+                    }
+                });
+                return { wch: maxLen + 4 };
+            });
+            ws['!cols'] = colWidths;
+
+            // تصدير وتحميل الملف
             const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "كشف الحساب اليومي");
+            XLSX.utils.book_append_sheet(wb, ws, "كشف المبيعات اليومي");
+            
             const dateStr = new Date().toISOString().slice(0, 10);
             XLSX.writeFile(wb, `مبيعات_كابو_${dateStr}.xlsx`);
         }
@@ -783,3 +810,4 @@
     </script>
 </body>
 </html>
+
