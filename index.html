@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام مبيعات زبادي كابو</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <style>
+        * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
+        body { background-color: #f1f5f9; margin: 0; padding: 12px; color: #1e293b; }
+        
+        .card { background: #ffffff; border-radius: 16px; border: 1px solid #cbd5e1; padding: 16px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .header { text-align: center; margin-bottom: 16px; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; position: relative; }
+        .title { color: #1d4ed8; font-size: 20px; font-weight: 900; margin: 0; }
+        .subtitle { display: inline-block; background: #e0f2fe; color: #0369a1; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; margin-top: 6px; }
+        .subtitle-old { background: #fef3c7; color: #92400e; }
+
+        .back-bar { display: none; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px; padding: 10px 14px; margin-bottom: 12px; justify-content: space-between; align-items: center; }
+        .btn-back-main { background: #16a34a; color: #fff; border: none; padding: 8px 16px; border-radius: 8px; font-weight: bold; font-size: 12px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .btn-back-main:hover { background: #15803d; }
+        
+        .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
+        .btn-add { background: #2563eb; color: #fff; border: none; padding: 8px 14px; border-radius: 10px; font-weight: bold; font-size: 12px; cursor: pointer; }
+        .btn-add-prod { background: #7c3aed; color: #fff; border: none; padding: 8px 14px; border-radius: 10px; font-weight: bold; font-size: 12px; cursor: pointer; }
+        .btn-add-prod:hover { background: #6d28d9; }
+        .btn-grand-total { background: #059669; color: #fff; border: none; padding: 8px 14px; border-radius: 10px; font-weight: bold; font-size: 12px; cursor: pointer; }
+        .btn-grand-total:hover { background: #047857; }
+        
+        .btn-del-cust-footer { background: #ffe4e6; color: #e11d48; border: 1px solid #fca5a5; padding: 2px 6px; border-radius: 6px; cursor: pointer; font-size: 10px; margin-top: 4px; display: inline-flex; align-items: center; justify-content: center; transition: all 0.2s; white-space: nowrap; }
+        .btn-del-cust-footer:hover { background: #fecdd3; transform: scale(1.05); }
+
+        .btn-del-prod-icon {
+            background-color: #ef4444;
+            color: #ffffff;
+            border: none;
+            cursor: pointer;
+            font-size: 10px;
+            font-weight: bold;
+            padding: 2px 5px;
+            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+            transition: all 0.15s ease;
+            margin-left: 2px;
+        }
+        .btn-del-prod-icon:hover {
+            background-color: #dc2626;
+            transform: scale(1.1);
+        }
+
+        .badge-count { background: #f1f5f9; border: 1px solid #cbd5e1; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: bold; }
+        
+        .table-container { overflow-x: auto; border: 2px solid #94a3b8; border-radius: 12px; max-width: 100%; }
+        table { width: 100%; border-collapse: collapse; text-align: center; font-size: 12px; }
+        th, td { border: 1px solid #94a3b8; padding: 4px; }
+        
+        thead tr { background: #1e3a8a; color: #fff; }
+        .th-sticky { position: sticky; right: 0; background: #0f172a; z-index: 20; min-width: 120px; }
+        .th-cust { background: #1e3a8a; min-width: 95px; }
+        .cust-input { width: 90%; background: #1e40af; color: #fff; border: 1px solid #3b82f6; text-align: center; border-radius: 4px; font-size: 11px; padding: 2px; }
+        .cust-input-error { border: 2px solid #ef4444 !important; background: #7f1d1d !important; }
+        .price-input-error { border: 2px solid #ef4444 !important; background: #fef2f2 !important; }
+        
+        .badge-طبيعي { background-color: #e0f2fe; color: #0369a1; }
+        .badge-جامد { background-color: #e0e7ff; color: #3730a3; }
+        .badge-مش { background-color: #fef3c7; color: #92400e; }
+        .badge-فراولة { background-color: #ffe4e6; color: #9f1239; }
+        .badge-مشروب { background-color: #fce7f3; color: #831843; }
+        .badge-جديد { background-color: #f0fdf4; color: #166534; }
+        
+        .sticky-cell { position: sticky; right: 0; z-index: 10; font-weight: bold; }
+        .prod-flex { display: flex; justify-content: space-between; align-items: center; padding: 0 4px; gap: 4px; }
+        .prod-info { display: flex; align-items: center; gap: 4px; }
+        .prod-size { background: rgba(255,255,255,0.8); border: 1px solid #cbd5e1; border-radius: 4px; padding: 1px 4px; font-size: 10px; white-space: nowrap; }
+        
+        input[type="number"], input[type="text"] { font-weight: bold; }
+        input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        
+        .cell-input { width: 95%; text-align: center; border: none; background: transparent; font-size: 13px; padding: 4px 0; }
+        .cell-input:focus { outline: none; background: #dbeafe; }
+        
+        tfoot tr { background: #0f172a; color: #fff; }
+        .footer-sticky { position: sticky; right: 0; background: #020617; color: #facc15; font-weight: bold; font-size: 11px; z-index: 10; }
+        .total-cell { color: #facc15; font-weight: 900; font-size: 12px; }
+        
+        .actions { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; padding-top: 12px; border-top: 2px solid #e2e8f0; }
+        @media (min-width: 640px) { .actions { flex-direction: row; justify-content: space-between; } }
+        
+        .btn-reset { background: #fff1f2; color: #be123c; border: 1px solid #fda4af; padding: 8px 16px; border-radius: 10px; font-weight: bold; font-size: 12px; cursor: pointer; }
+        .btn-save { background: #0284c7; color: #fff; border: none; padding: 10px 18px; border-radius: 10px; font-weight: 900; font-size: 13px; cursor: pointer; }
+        .btn-excel { background: #059669; color: #fff; border: none; padding: 10px 18px; border-radius: 10px; font-weight: 900; font-size: 13px; cursor: pointer; }
+
+        .records-section { margin-top: 20px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 12px; padding: 14px; }
+        .records-header { font-size: 14px; font-weight: 800; color: #334155; margin-bottom: 10px; }
+        .records-list { display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto; }
+        .record-item { display: flex; justify-content: space-between; align-items: center; background: #fff; border: 1px solid #e2e8f0; padding: 8px 12px; border-radius: 8px; }
+        .record-title { font-size: 12px; font-weight: bold; color: #1e293b; }
+        .record-btns { display: flex; gap: 6px; }
+        .btn-load { background: #e0f2fe; color: #0369a1; border: 1px solid #7dd3fc; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; }
+        .btn-del { background: #ffe4e6; color: #be123c; border: 1px solid #fca5a5; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; }
+
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 100; justify-content: center; align-items: center; padding: 16px; }
+        .modal-box { background: #fff; border-radius: 16px; max-width: 420px; width: 100%; padding: 20px; text-align: center; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); border: 2px solid #cbd5e1; }
+        .modal-box-danger { border-color: #f87171; }
+        .modal-box-warning { border-color: #fbbf24; }
+        .modal-box-save { border-color: #3b82f6; }
+        .modal-box-prod { border-color: #8b5cf6; }
+        .modal-icon { font-size: 40px; margin-bottom: 8px; }
+        .modal-title { font-size: 16px; font-weight: 900; margin-bottom: 6px; }
+        .modal-desc { font-size: 12px; color: #4b5563; margin-bottom: 16px; line-height: 1.5; }
+        .modal-actions { display: flex; flex-direction: column; gap: 8px; justify-content: center; }
+        
+        .btn-modal-cancel { background: #f3f4f6; color: #374151; border: 1px solid #d1d5db; padding: 8px 16px; border-radius: 8px; font-weight: bold; font-size: 12px; cursor: pointer; }
+        .btn-modal-confirm { background: #dc2626; color: #fff; border: none; padding: 8px 16px; border-radius: 8px; font-weight: bold; font-size: 12px; cursor: pointer; }
+        .btn-modal-ok { background: #2563eb; color: #fff; border: none; padding: 8px 24px; border-radius: 8px; font-weight: bold; font-size: 12px; cursor: pointer; }
+        .btn-modal-overwrite { background: #0284c7; color: #fff; border: none; padding: 10px 14px; border-radius: 8px; font-weight: bold; font-size: 12px; cursor: pointer; }
+        .btn-modal-saveas { background: #16a34a; color: #fff; border: none; padding: 10px 14px; border-radius: 8px; font-weight: bold; font-size: 12px; cursor: pointer; }
+        .btn-modal-prod { background: #7c3aed; color: #fff; border: none; padding: 8px 16px; border-radius: 8px; font-weight: bold; font-size: 12px; cursor: pointer; }
+
+        .modal-input { width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; margin-bottom: 10px; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <div class="header">
+            <h1 class="title">كشف مبيعات زبادي كابو اليومي</h1>
+            <span class="subtitle" id="current_editing_tag">الجدول الحالي (الشاشة الرئيسية)</span>
+        </div>
+
+        <div class="back-bar" id="backToMainBar">
+            <button onclick="switchToMainSheet()" class="btn-back-main" style="width: 100%;">
+                ⬅️ العودة لجدول الحالي (الشاشة الرئيسية)
+            </button>
+        </div>
+
+        <div class="toolbar">
+            <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+                <button onclick="addCustomerColumn()" class="btn-add">+ إضافة عميل جديد</button>
+                <button onclick="showAddProductModal()" class="btn-add-prod">+ إضافة صنف جديد</button>
+                <button onclick="calculateGrandTotal()" class="btn-grand-total">💰 إجمالي المبلغ الكلي</button>
+            </div>
+            <span id="cust_count_badge" class="badge-count">عدد العملاء الحالي: 10</span>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr id="tableHeaderRow">
+                        <th class="th-sticky">الصنف / الحجم</th>
+                        <th style="min-width: 85px; color: #facc15;">سعر القطعة</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+                <tfoot>
+                    <tr id="tableFooterRow">
+                        <td colspan="2" class="footer-sticky">إجمالي العميل (ج)</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <div class="actions">
+            <button id="btnResetMain" onclick="showResetModal()" class="btn-reset">⚠️ تصفير الكشف والبيانات</button>
+            <div style="display: flex; gap: 8px; width: 100%; justify-content: flex-end;">
+                <button onclick="handleSaveButtonClick()" class="btn-save">💾 حفظ اليومية والتاريخ</button>
+                <button onclick="exportToExcel()" class="btn-excel">تصدير لـ Excel</button>
+            </div>
+        </div>
+
+        <div class="records-section">
+            <div class="records-header">📂 اليوميات والسجلات المحفوظة سابقاً:</div>
+            <div class="records-list" id="recordsList"></div>
+        </div>
+    </div>
+
+    <!-- نافذة إضافة صنف جديد -->
+    <div class="modal-overlay" id="addProductModal">
+        <div class="modal-box modal-box-prod">
+            <div class="modal-icon">📦</div>
+            <div class="modal-title" style="color: #6d28d9;">إضافة صنف جديد للكشف</div>
+            <div class="modal-desc">
+                أدخلي اسم الصنف والحجم المترادف معه. سيتم تثبيت هذا الصنف في الجدول ويمكنكِ حذفه لاحقاً عبر أيقونة السلة.
+            </div>
+            <input type="text" id="newCatInput" placeholder="اسم الصنف (مثلاً: طبيعي، زبادي خفيف)" class="modal-input">
+            <input type="text" id="newSizeInput" placeholder="الحجم / العبوة (مثلاً: 500g، عادي)" class="modal-input">
+            <div class="modal-actions" style="flex-direction: row; gap: 8px;">
+                <button onclick="closeAddProductModal()" class="btn-modal-cancel" style="flex: 1;">إلغاء</button>
+                <button onclick="confirmAddProduct()" class="btn-modal-prod" style="flex: 1;">تأكيد وحفظ الصنف</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة خيارات الحفظ -->
+    <div class="modal-overlay" id="saveOptionsModal">
+        <div class="modal-box modal-box-save">
+            <div class="modal-icon">💾</div>
+            <div class="modal-title" style="color: #1e40af;">خيارات حفظ التعديلات</div>
+            <div class="modal-desc" id="saveOptionsDesc">ترغبين في حفظ التغييرات الحالية على اليومية:</div>
+            <div class="modal-actions">
+                <button onclick="confirmOverwriteRecord()" class="btn-modal-overwrite">
+                    🔄 حفظ وتحديث في نفس الجدول (<span id="currentRecordNameSpan"></span>)
+                </button>
+                <button onclick="confirmSaveAsNewRecord()" class="btn-modal-saveas">
+                    ➕ حفظ باسم جديد (نسخة جديدة بالتاريخ والاسم)
+                </button>
+                <button onclick="closeSaveOptionsModal()" class="btn-modal-cancel" style="margin-top: 4px;">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة التنبيهات العامة -->
+    <div class="modal-overlay" id="alertModal">
+        <div class="modal-box modal-box-warning">
+            <div class="modal-icon" id="alertIcon">⚠️</div>
+            <div class="modal-title" style="color: #b45309;" id="alertTitle">تنبيه!</div>
+            <div class="modal-desc" id="alertDesc"></div>
+            <div class="modal-actions">
+                <button onclick="closeAlertModal()" class="btn-modal-ok">حسناً، فهمت</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة التصفير -->
+    <div class="modal-overlay" id="resetModal">
+        <div class="modal-box modal-box-danger">
+            <div class="modal-icon" style="color: #dc2626;">⚠️</div>
+            <div class="modal-title" style="color: #991b1b;">تنبيه: تصفير الكشف الحاضر!</div>
+            <div class="modal-desc">
+                هل أنتِ متأكدة من مسح الأعداد، الأسعار، وأسماء العملاء الحالية؟<br>
+                <strong>ملاحظة:</strong> اليوميات المحفوظة سابقاً لن تتأثر بهذا التصفير.
+            </div>
+            <div class="modal-actions" style="flex-direction: row; gap: 8px;">
+                <button onclick="closeResetModal()" class="btn-modal-cancel" style="flex: 1;">إلغاء</button>
+                <button onclick="confirmClearAllData()" class="btn-modal-confirm" style="flex: 1;">نعم، تصفير الكشف</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const defaultProducts = [
+            { cat: 'طبيعي', size: '110', style: 'badge-طبيعي' },
+            { cat: 'طبيعي', size: '350', style: 'badge-طبيعي' },
+            { cat: 'طبيعي', size: '400', style: 'badge-طبيعي' },
+            { cat: 'طبيعي', size: '800', style: 'badge-طبيعي' },
+            { cat: 'طبيعي', size: '1000', style: 'badge-طبيعي' },
+            { cat: 'جامد', size: '110', style: 'badge-جامد' },
+            { cat: 'جامد', size: '350', style: 'badge-جامد' },
+            { cat: 'جامد', size: '400', style: 'badge-جامد' },
+            { cat: 'جامد', size: '800', style: 'badge-جامد' },
+            { cat: 'جامد', size: '1000', style: 'badge-جامد' },
+            { cat: 'مش', size: '200', style: 'badge-مش' },
+            { cat: 'مش', size: '400', style: 'badge-مش' },
+            { cat: 'فراولة', size: '80', style: 'badge-فراولة' },
+            { cat: 'مشروب فراولة', size: 'عادي', style: 'badge-مشروب' }
+        ];
+
+        let products = JSON.parse(localStorage.getItem('kabo_v3_products')) || defaultProducts;
+        let savedRecords = JSON.parse(localStorage.getItem('kabo_saved_records')) || {};
+        let currentRecordKey = null;
+
+        let customersCount = Number(localStorage.getItem('kabo_v3_cust_count')) || 10;
+        let salesData = JSON.parse(localStorage.getItem('kabo_v3_sales')) || {};
+        let priceData = JSON.parse(localStorage.getItem('kabo_v3_prices')) || {};
+        let customerNames = JSON.parse(localStorage.getItem('kabo_v3_names')) || {};
+
+        function addCustomerColumn() {
+            customersCount++;
+            saveCurrentState();
+            renderApp();
+        }
+
+        function removeLastCustomerColumn() {
+            if (customersCount <= 1) {
+                showAlertModal("تنبيه", "لا يمكنك حذف المزيد من العملاء، يجب إبقاء عميل واحد على الأقل.");
+                return;
+            }
+
+            const lastIndex = customersCount;
+            const lastName = customerNames[lastIndex] ? customerNames[lastIndex].trim() : `عميل #${lastIndex}`;
+
+            if (confirm(`هل أنت متأكدة من حذف العمود الأخير (${lastName})؟`)) {
+                delete customerNames[lastIndex];
+                products.forEach((_, pIdx) => {
+                    delete salesData[`${pIdx}_${lastIndex}`];
+                });
+
+                customersCount--;
+                saveCurrentState();
+                renderApp();
+            }
+        }
+
+        function deleteProduct(pIdx) {
+            const prod = products[pIdx];
+            if (confirm(`هل أنت متأكد من حذف صنف "${prod.cat} (${prod.size})" نهائياً من الكشف؟`)) {
+                let newSalesData = {};
+                let newPriceData = {};
+
+                products.splice(pIdx, 1);
+
+                products.forEach((_, newIdx) => {
+                    const oldIdx = newIdx >= pIdx ? newIdx + 1 : newIdx;
+                    if (priceData[oldIdx] !== undefined) {
+                        newPriceData[newIdx] = priceData[oldIdx];
+                    }
+                    for (let c = 1; c <= customersCount; c++) {
+                        if (salesData[`${oldIdx}_${c}`] !== undefined) {
+                            newSalesData[`${newIdx}_${c}`] = salesData[`${oldIdx}_${c}`];
+                        }
+                    }
+                });
+
+                salesData = newSalesData;
+                priceData = newPriceData;
+
+                localStorage.setItem('kabo_v3_products', JSON.stringify(products));
+                saveCurrentState();
+                renderApp();
+            }
+        }
+
+        function showAddProductModal() {
+            document.getElementById('newCatInput').value = '';
+            document.getElementById('newSizeInput').value = '';
+            document.getElementById('addProductModal').style.display = 'flex';
+        }
+
+        function closeAddProductModal() {
+            document.getElementById('addProductModal').style.display = 'none';
+        }
+
+        function confirmAddProduct() {
+            const cat = document.getElementById('newCatInput').value.trim();
+            const size = document.getElementById('newSizeInput').value.trim();
+
+            if (!cat || !size) {
+                alert('الرجاء كتابة اسم الصنف والحجم بشكل صحيح!');
+                return;
+            }
+
+            products.push({ cat: cat, size: size, style: 'badge-جديد' });
+            localStorage.setItem('kabo_v3_products', JSON.stringify(products));
+            
+            closeAddProductModal();
+            saveCurrentState();
+            renderApp();
+        }
+
+        function saveCustomerName(colIndex, name) {
+            if (name.trim() === '') {
+                delete customerNames[colIndex];
+            } else {
+                customerNames[colIndex] = name;
+            }
+            
+            const inputElem = document.getElementById(`cust_name_input_${colIndex}`);
+            if (inputElem && name.trim() !== '') {
+                inputElem.classList.remove('cust-input-error');
+            }
+            
+            saveCurrentState();
+        }
+
+        function savePrice(pIdx, price) {
+            if (price === '' || price < 0) {
+                delete priceData[pIdx];
+            } else {
+                priceData[pIdx] = Number(price);
+            }
+
+            const priceInput = document.getElementById(`price_input_${pIdx}`);
+            if (priceInput && Number(price) > 0) {
+                priceInput.classList.remove('price-input-error');
+            }
+
+            saveCurrentState();
+            calculateTotals();
+        }
+
+        function saveQty(pIdx, colIndex, inputElem) {
+            const val = inputElem.value;
+            const key = `${pIdx}_${colIndex}`;
+
+            if (val !== '' && Number(val) > 0) {
+                const price = priceData[pIdx] !== undefined ? Number(priceData[pIdx]) : 0;
+                if (!price || price <= 0) {
+                    inputElem.value = '';
+                    delete salesData[key];
+
+                    const priceInput = document.getElementById(`price_input_${pIdx}`);
+                    if (priceInput) priceInput.classList.add('price-input-error');
+
+                    showAlertModal(
+                        `⚠️ تنبيه: سعر الصنف غير مسبق!`, 
+                        `لا يمكنك كتابة أعداد مبيعات لصنف "${products[pIdx].cat} (${products[pIdx].size})" قبل تحديد سعر القطعة في خانة الأسعارأولاً.`
+                    );
+                    saveCurrentState();
+                    calculateTotals();
+                    return;
+                }
+
+                const name = customerNames[colIndex] ? customerNames[colIndex].trim() : '';
+                if (!name) {
+                    inputElem.value = '';
+                    delete salesData[key];
+                    
+                    const nameInput = document.getElementById(`cust_name_input_${colIndex}`);
+                    if (nameInput) nameInput.classList.add('cust-input-error');
+
+                    showAlertModal(
+                        `⚠️ تنبيه: عميل #${colIndex} بدون اسم!`, 
+                        `الرجاء كتابة اسم المحل أو العميل في أعلى العمود (#${colIndex}) أولاً قبل إدخال الأعداد.`
+                    );
+                    saveCurrentState();
+                    calculateTotals();
+                    return;
+                }
+                salesData[key] = Number(val);
+            } else {
+                delete salesData[key];
+            }
+
+            saveCurrentState();
+            calculateTotals();
+        }
+
+        function showAlertModal(title, desc, icon = "⚠️") {
+            document.getElementById('alertIcon').innerText = icon;
+            document.getElementById('alertTitle').innerText = title;
+            document.getElementById('alertDesc').innerText = desc;
+            document.getElementById('alertModal').style.display = 'flex';
+        }
+
+        function closeAlertModal() {
+            document.getElementById('alertModal').style.display = 'none';
+        }
+
+        /* --- دالة حساب المجموع الكلي للجدول بالكامل --- */
+        function calculateGrandTotal() {
+            let grandTotal = 0;
+            for (let c = 1; c <= customersCount; c++) {
+                products.forEach((_, pIdx) => {
+                    const key = `${pIdx}_${c}`;
+                    const qty = Number(salesData[key]) || 0;
+                    const price = Number(priceData[pIdx]) || 0;
+                    grandTotal += (qty * price);
+                });
+            }
+
+            showAlertModal(
+                "💰 إجمالي مبيعات الكشف الكلي", 
+                `المبلغ الإجمالي الكلي لجميع العملاء في هذا الجدول هو:\n\n` +
+                ` ${grandTotal.toLocaleString()} جنيه سوداني `,
+                "💵"
+            );
+        }
+
+        function saveCurrentState() {
+            localStorage.setItem('kabo_v3_cust_count', customersCount);
+            localStorage.setItem('kabo_v3_sales', JSON.stringify(salesData));
+            localStorage.setItem('kabo_v3_prices', JSON.stringify(priceData));
+            localStorage.setItem('kabo_v3_names', JSON.stringify(customerNames));
+            localStorage.setItem('kabo_v3_products', JSON.stringify(products));
+        }
+
+        function renderApp() {
+            const tag = document.getElementById('current_editing_tag');
+            const backBar = document.getElementById('backToMainBar');
+            const resetBtn = document.getElementById('btnResetMain');
+
+            if (currentRecordKey) {
+                tag.innerText = `📁 معروض حالياً السجل: [ ${currentRecordKey} ]`;
+                tag.className = "subtitle subtitle-old";
+                backBar.style.display = 'flex';
+                resetBtn.style.display = 'none';
+            } else {
+                tag.innerText = "🟢 الجدول الحالي (الشاشة الرئيسية)";
+                tag.className = "subtitle";
+                backBar.style.display = 'none';
+                resetBtn.style.display = 'inline-block';
+            }
+
+            document.getElementById('cust_count_badge').innerText = `عدد العملاء الحالي: ${customersCount}`;
+
+            const headerRow = document.getElementById('tableHeaderRow');
+            headerRow.innerHTML = `
+                <th class="th-sticky">الصنف / الحجم</th>
+                <th style="min-width: 85px; color: #facc15;">سعر القطعة</th>
+            `;
+            for (let c = 1; c <= customersCount; c++) {
+                const th = document.createElement('th');
+                th.className = "th-cust";
+                th.innerHTML = `
+                    <div style="font-size: 9px; color: #93c5fd;">عميل #${c}</div>
+                    <input type="text" id="cust_name_input_${c}" value="${customerNames[c] || ''}" placeholder="اسم المحل" 
+                        oninput="saveCustomerName(${c}, this.value)" class="cust-input">
+                `;
+                headerRow.appendChild(th);
+            }
+
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+
+            products.forEach((prod, pIdx) => {
+                const tr = document.createElement('tr');
+
+                const nameTd = document.createElement('td');
+                nameTd.className = `sticky-cell ${prod.style}`;
+                nameTd.innerHTML = `
+                    <div class="prod-flex">
+                        <div class="prod-info">
+                            <button onclick="deleteProduct(${pIdx})" class="btn-del-prod-icon" title="حذف هذا الصنف">🗑️</button>
+                            <span>${prod.cat}</span>
+                        </div>
+                        <span class="prod-size">${prod.size}</span>
+                    </div>
+                `;
+                tr.appendChild(nameTd);
+
+                const priceTd = document.createElement('td');
+                priceTd.style.backgroundColor = '#fefce8';
+                const unitPrice = priceData[pIdx] !== undefined ? priceData[pIdx] : '';
+                priceTd.innerHTML = `
+                    <input type="number" id="price_input_${pIdx}" value="${unitPrice}" placeholder="السعر"
+                        oninput="savePrice(${pIdx}, this.value)" class="cell-input" style="color: #1e3a8a;">
+                `;
+                tr.appendChild(priceTd);
+
+                for (let c = 1; c <= customersCount; c++) {
+                    const td = document.createElement('td');
+                    const key = `${pIdx}_${c}`;
+                    const qtyVal = salesData[key] !== undefined ? salesData[key] : '';
+                    td.innerHTML = `
+                        <input type="number" value="${qtyVal}" placeholder="0" min="0"
+                            oninput="saveQty(${pIdx}, ${c}, this)" class="cell-input">
+                    `;
+                    tr.appendChild(td);
+                }
+                tbody.appendChild(tr);
+            });
+
+            const footerRow = document.getElementById('tableFooterRow');
+            footerRow.innerHTML = `<td colspan="2" class="footer-sticky">إجمالي العميل (ج)</td>`;
+            for (let c = 1; c <= customersCount; c++) {
+                const td = document.createElement('td');
+                const isLastCol = (c === customersCount);
+                
+                td.className = "total-cell";
+                td.innerHTML = `
+                    <div id="total_price_col_${c}">0</div>
+                    ${isLastCol ? `<button onclick="removeLastCustomerColumn()" class="btn-del-cust-footer" title="حذف العميل الأخير">🗑️ حذف العميل</button>` : ''}
+                `;
+                footerRow.appendChild(td);
+            }
+
+            calculateTotals();
+            renderSavedRecords();
+        }
+
+        function calculateTotals() {
+            for (let c = 1; c <= customersCount; c++) {
+                let totalAmount = 0;
+                products.forEach((_, pIdx) => {
+                    const key = `${pIdx}_${c}`;
+                    const qty = Number(salesData[key]) || 0;
+                    const price = Number(priceData[pIdx]) || 0;
+                    totalAmount += (qty * price);
+                });
+                const totalElem = document.getElementById(`total_price_col_${c}`);
+                if (totalElem) {
+                    totalElem.innerText = totalAmount.toLocaleString();
+                }
+            }
+        }
+
+        function checkUnnamedCustomersWithSales() {
+            for (let c = 1; c <= customersCount; c++) {
+                const name = customerNames[c] ? customerNames[c].trim() : '';
+                if (!name) {
+                    let hasSales = false;
+                    products.forEach((_, pIdx) => {
+                        if (Number(salesData[`${pIdx}_${c}`]) > 0) hasSales = true;
+                    });
+                    if (hasSales) {
+                        const nameInput = document.getElementById(`cust_name_input_${c}`);
+                        if (nameInput) nameInput.classList.add('cust-input-error');
+                        showAlertModal("⚠️ توجد مبيعات بدون اسم عميل!", `العميل رقم #${c} يحتوي على مبيعات ولكنه بدون اسم. يرجى كتابة اسم العميل أولاً قبل متابعة التصدير أو الحفظ.`);
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        function switchToMainSheet() {
+            currentRecordKey = null;
+            customersCount = Number(localStorage.getItem('kabo_v3_cust_count')) || 10;
+            salesData = JSON.parse(localStorage.getItem('kabo_v3_sales')) || {};
+            priceData = JSON.parse(localStorage.getItem('kabo_v3_prices')) || {};
+            customerNames = JSON.parse(localStorage.getItem('kabo_v3_names')) || {};
+            products = JSON.parse(localStorage.getItem('kabo_v3_products')) || defaultProducts;
+            renderApp();
+        }
+
+        function loadRecord(key) {
+            const rec = savedRecords[key];
+            if (!rec) return;
+
+            customersCount = rec.customersCount;
+            salesData = JSON.parse(JSON.stringify(rec.salesData || {}));
+            priceData = JSON.parse(JSON.stringify(rec.priceData || {}));
+            customerNames = JSON.parse(JSON.stringify(rec.customerNames || {}));
+            products = rec.products ? JSON.parse(JSON.stringify(rec.products)) : [...defaultProducts];
+            
+            currentRecordKey = key;
+            renderApp();
+        }
+
+        function handleSaveButtonClick() {
+            if (!checkUnnamedCustomersWithSales()) return;
+
+            if (currentRecordKey) {
+                document.getElementById('currentRecordNameSpan').innerText = currentRecordKey;
+                document.getElementById('saveOptionsModal').style.display = 'flex';
+            } else {
+                promptNewSaveRecord();
+            }
+        }
+
+        function closeSaveOptionsModal() {
+            document.getElementById('saveOptionsModal').style.display = 'none';
+        }
+
+        function confirmOverwriteRecord() {
+            if (!currentRecordKey) return;
+
+            savedRecords[currentRecordKey] = {
+                customersCount: customersCount,
+                salesData: JSON.parse(JSON.stringify(salesData)),
+                priceData: JSON.parse(JSON.stringify(priceData)),
+                customerNames: JSON.parse(JSON.stringify(customerNames)),
+                products: JSON.parse(JSON.stringify(products)),
+                timestamp: new Date().toISOString()
+            };
+
+            localStorage.setItem('kabo_saved_records', JSON.stringify(savedRecords));
+            closeSaveOptionsModal();
+            alert(`تم التحديث والحفظ بنجاح في اليومية: "${currentRecordKey}"`);
+            renderApp();
+        }
+
+        function confirmSaveAsNewRecord() {
+            closeSaveOptionsModal();
+            promptNewSaveRecord();
+        }
+
+        function promptNewSaveRecord() {
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('ar-EG', { year: 'numeric', month: '2-digit', day: '2-digit' });
+            const timeStr = now.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
+            
+            let recordName = prompt("أدخلي اسم اليومية أو التاريخ للنسخة الجديدة:", `يومية ${dateStr} - ${timeStr}`);
+            if (!recordName) return;
+
+            savedRecords[recordName] = {
+                customersCount: customersCount,
+                salesData: JSON.parse(JSON.stringify(salesData)),
+                priceData: JSON.parse(JSON.stringify(priceData)),
+                customerNames: JSON.parse(JSON.stringify(customerNames)),
+                products: JSON.parse(JSON.stringify(products)),
+                timestamp: now.toISOString()
+            };
+
+            localStorage.setItem('kabo_saved_records', JSON.stringify(savedRecords));
+            currentRecordKey = recordName;
+            alert(`تم حفظ اليومية بنجاح باسم جديد: "${recordName}"`);
+            renderApp();
+        }
+
+        function renderSavedRecords() {
+            const container = document.getElementById('recordsList');
+            container.innerHTML = '';
+
+            const keys = Object.keys(savedRecords);
+
+            if (keys.length === 0) {
+                container.innerHTML = `<div style="font-size: 11px; color: #94a3b8; text-align: center;">لا توجد يوميات محفوظة حتى الآن.</div>`;
+                return;
+            }
+
+            keys.reverse().forEach(key => {
+                const isSelected = key === currentRecordKey;
+                const div = document.createElement('div');
+                div.className = 'record-item';
+                if(isSelected) div.style.borderColor = "#2563eb";
+
+                div.innerHTML = `
+                    <span class="record-title">${isSelected ? '📌 (مفتوح) ' : '📄 '} ${key}</span>
+                    <div class="record-btns">
+                        <button onclick="loadRecord('${key}')" class="btn-load">${isSelected ? 'إعادة العرض' : 'عرض / تعديل'}</button>
+                        <button onclick="deleteRecord('${key}')" class="btn-del">حذف</button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function deleteRecord(key) {
+            if (confirm(`هل أنت متأكد من حذف يومية "${key}" نهائياً؟`)) {
+                delete savedRecords[key];
+                localStorage.setItem('kabo_saved_records', JSON.stringify(savedRecords));
+                if (currentRecordKey === key) switchToMainSheet();
+                else renderSavedRecords();
+            }
+        }
+
+        function showResetModal() { document.getElementById('resetModal').style.display = 'flex'; }
+        function closeResetModal() { document.getElementById('resetModal').style.display = 'none'; }
+
+        function confirmClearAllData() {
+            salesData = {}; priceData = {}; customerNames = {}; customersCount = 10;
+            saveCurrentState();
+            closeResetModal();
+            renderApp();
+        }
+
+        function exportToExcel() {
+            if (!checkUnnamedCustomersWithSales()) return;
+
+            if (typeof XLSX === 'undefined') {
+                alert('لتصدير ملف Excel يتطلب اتصال ""بالإنترنت لتحميل المكتبة.');
+                return;
+            }
+            let excelRows = [];
+            let headerRow = ['الصنف / الحجم', 'سعر القطعة'];
+            for (let c = 1; c <= customersCount; c++) {
+                const name = customerNames[c] ? `${customerNames[c]}` : `عميل ${c}`;
+                headerRow.push(`${name} (عدد)`);
+            }
+            excelRows.push(headerRow);
+
+            products.forEach((prod, pIdx) => {
+                const price = Number(priceData[pIdx]) || 0;
+                let row = [`${prod.cat} (${prod.size})`, price];
+                for (let c = 1; c <= customersCount; c++) {
+                    const key = `${pIdx}_${c}`;
+                    row.push(salesData[key] ? Number(salesData[key]) : 0);
+                }
+                excelRows.push(row);
+            });
+
+            let totalRow = ['الإجمالي المالي (جنيه)', '-'];
+            let grandTotal = 0;
+            for (let c = 1; c <= customersCount; c++) {
+                let sum = 0;
+                products.forEach((_, pIdx) => {
+                    const qty = Number(salesData[`${pIdx}_${c}`]) || 0;
+                    const price = Number(priceData[pIdx]) || 0;
+                    sum += (qty * price);
+                });
+                totalRow.push(sum);
+                grandTotal += sum;
+            }
+            excelRows.push(totalRow);
+            
+            // إضافة صف للإجمالي الكلي في شيت الإكسل
+            excelRows.push(['إجمالي اليومية الكلي', grandTotal]);
+
+            const ws = XLSX.utils.aoa_to_sheet(excelRows);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "كشف الحساب اليومي");
+            const dateStr = new Date().toISOString().slice(0, 10);
+            XLSX.writeFile(wb, `مبيعات_كابو_${dateStr}.xlsx`);
+        }
+
+        window.onload = renderApp;
+    </script>
+</body>
+</html>
