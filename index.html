@@ -1,11 +1,9 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>نظام مبيعات زبادي كابو</title>
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
     <style>
         * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
@@ -32,37 +30,23 @@
         .btn-del-cust-footer:hover { background: #fecdd3; transform: scale(1.05); }
 
         .btn-del-prod-icon {
-            background-color: #ef4444;
-            color: #ffffff;
-            border: none;
-            cursor: pointer;
-            font-size: 10px;
-            font-weight: bold;
-            padding: 2px 5px;
-            border-radius: 4px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            line-height: 1;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.15);
-            transition: all 0.15s ease;
-            margin-left: 2px;
+            background-color: #ef4444; color: #ffffff; border: none; cursor: pointer;
+            font-size: 10px; font-weight: bold; padding: 2px 5px; border-radius: 4px;
+            display: inline-flex; align-items: center; justify-content: center; line-height: 1;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.15); transition: all 0.15s ease; margin-left: 2px;
         }
-        .btn-del-prod-icon:hover {
-            background-color: #dc2626;
-            transform: scale(1.1);
-        }
+        .btn-del-prod-icon:hover { background-color: #dc2626; transform: scale(1.1); }
 
         .badge-count { background: #f1f5f9; border: 1px solid #cbd5e1; padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: bold; }
         
-        .table-container { overflow-x: auto; border: 2px solid #94a3b8; border-radius: 12px; max-width: 100%; }
+        .table-container { overflow-x: auto; border: none; max-width: 100%; background: #ffffff; padding: 0; }
         table { width: 100%; border-collapse: collapse; text-align: center; font-size: 12px; }
-        th, td { border: 1px solid #94a3b8; padding: 4px; }
+        th, td { border: 1px solid #94a3b8; padding: 5px; }
         
         thead tr { background: #1e3a8a; color: #fff; }
-        .th-sticky { position: sticky; right: 0; background: #0f172a; z-index: 20; min-width: 120px; }
-        .th-cust { background: #1e3a8a; min-width: 95px; }
-        .cust-input { width: 90%; background: #1e40af; color: #fff; border: 1px solid #3b82f6; text-align: center; border-radius: 4px; font-size: 11px; padding: 2px; }
+        .th-sticky { position: sticky; right: 0; background: #0f172a; z-index: 20; min-width: 125px; }
+        .th-cust { background: #1e3a8a; min-width: 100px; }
+        .cust-input { width: 92%; background: #1e40af; color: #fff; border: 1px solid #3b82f6; text-align: center; border-radius: 4px; font-size: 11px; padding: 3px; font-weight: bold; }
         .cust-input-error { border: 2px solid #ef4444 !important; background: #7f1d1d !important; }
         .price-input-error { border: 2px solid #ef4444 !important; background: #fef2f2 !important; }
         
@@ -76,12 +60,12 @@
         .sticky-cell { position: sticky; right: 0; z-index: 10; font-weight: bold; }
         .prod-flex { display: flex; justify-content: space-between; align-items: center; padding: 0 4px; gap: 4px; }
         .prod-info { display: flex; align-items: center; gap: 4px; }
-        .prod-size { background: rgba(255,255,255,0.8); border: 1px solid #cbd5e1; border-radius: 4px; padding: 1px 4px; font-size: 10px; white-space: nowrap; }
+        .prod-size { background: rgba(255,255,255,0.85); border: 1px solid #cbd5e1; border-radius: 4px; padding: 1px 4px; font-size: 10px; white-space: nowrap; font-weight: bold; }
         
         input[type="number"], input[type="text"] { font-weight: bold; }
         input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
         
-        .cell-input { width: 95%; text-align: center; border: none; background: transparent; font-size: 13px; padding: 4px 0; }
+        .cell-input { width: 95%; text-align: center; border: none; background: transparent; font-size: 13px; padding: 4px 0; font-weight: bold; }
         .cell-input:focus { outline: none; background: #dbeafe; }
         
         tfoot tr { background: #0f172a; color: #fff; }
@@ -93,7 +77,8 @@
         
         .btn-reset { background: #fff1f2; color: #be123c; border: 1px solid #fda4af; padding: 8px 16px; border-radius: 10px; font-weight: bold; font-size: 12px; cursor: pointer; }
         .btn-save { background: #0284c7; color: #fff; border: none; padding: 10px 18px; border-radius: 10px; font-weight: 900; font-size: 13px; cursor: pointer; }
-        .btn-excel { background: #059669; color: #fff; border: none; padding: 10px 18px; border-radius: 10px; font-weight: 900; font-size: 13px; cursor: pointer; }
+        .btn-pdf { background: #dc2626; color: #fff; border: none; padding: 10px 18px; border-radius: 10px; font-weight: 900; font-size: 13px; cursor: pointer; transition: background 0.2s; }
+        .btn-pdf:hover { background: #b91c1c; }
 
         .records-section { margin-top: 20px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 12px; padding: 14px; }
         .records-header { font-size: 14px; font-weight: 800; color: #334155; margin-bottom: 10px; }
@@ -104,7 +89,7 @@
         .btn-load { background: #e0f2fe; color: #0369a1; border: 1px solid #7dd3fc; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; }
         .btn-del { background: #ffe4e6; color: #be123c; border: 1px solid #fca5a5; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; }
 
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 100; justify-content: center; align-items: center; padding: 16px; }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); z-index: 100; justify-content: center; align-items: center; padding: 16px; }
         .modal-box { background: #fff; border-radius: 16px; max-width: 420px; width: 100%; padding: 20px; text-align: center; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); border: 2px solid #cbd5e1; }
         .modal-box-danger { border-color: #f87171; }
         .modal-box-warning { border-color: #fbbf24; }
@@ -116,13 +101,25 @@
         .modal-actions { display: flex; flex-direction: column; gap: 8px; justify-content: center; }
         
         .btn-modal-cancel { background: #f3f4f6; color: #374151; border: 1px solid #d1d5db; padding: 8px 16px; border-radius: 8px; font-weight: bold; font-size: 12px; cursor: pointer; }
-        .btn-modal-confirm { background: #dc2626; color: #fff; border: none; padding: 8px 16px; border-radius: 8px; font-weight: bold; font-size: 12px; cursor: pointer; }
         .btn-modal-ok { background: #2563eb; color: #fff; border: none; padding: 8px 24px; border-radius: 8px; font-weight: bold; font-size: 12px; cursor: pointer; }
         .btn-modal-overwrite { background: #0284c7; color: #fff; border: none; padding: 10px 14px; border-radius: 8px; font-weight: bold; font-size: 12px; cursor: pointer; }
         .btn-modal-saveas { background: #16a34a; color: #fff; border: none; padding: 10px 14px; border-radius: 8px; font-weight: bold; font-size: 12px; cursor: pointer; }
         .btn-modal-prod { background: #7c3aed; color: #fff; border: none; padding: 8px 16px; border-radius: 8px; font-weight: bold; font-size: 12px; cursor: pointer; }
 
         .modal-input { width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; margin-bottom: 10px; text-align: center; }
+
+        /* تنسيقات الطباعة الأصلية بدون الحاجة لمكتبات خارجية */
+        @media print {
+            body { background: white; padding: 0; margin: 0; }
+            .card { border: none; box-shadow: none; padding: 0; margin: 0; }
+            .toolbar, .actions, .records-section, .back-bar, .btn-del-prod-icon, .btn-del-cust-footer { display: none !important; }
+            .table-container { overflow: visible; }
+            .print-page-break { page-break-after: always; margin-top: 15px; }
+            .print-table { width: 100%; border-collapse: collapse; text-align: center; font-size: 10pt; }
+            .print-table th, .print-table td { border: 1px solid #000; padding: 4px; }
+            .print-table th { background-color: #1e3a8a !important; color: white !important; -webkit-print-color-adjust: exact; }
+            .print-title { text-align: center; color: #1d4ed8; font-size: 14pt; font-weight: bold; margin-bottom: 10px; }
+        }
     </style>
 </head>
 <body>
@@ -148,8 +145,8 @@
             <span id="cust_count_badge" class="badge-count">عدد العملاء الحالي: 10</span>
         </div>
 
-        <div class="table-container">
-            <table>
+        <div class="table-container" id="tableCaptureContainer">
+            <table id="mainSalesTable">
                 <thead>
                     <tr id="tableHeaderRow">
                         <th class="th-sticky">الصنف / الحجم</th>
@@ -167,10 +164,10 @@
         </div>
 
         <div class="actions">
-            <button id="btnResetMain" onclick="showResetModal()" class="btn-reset">⚠️ حذف الكشف والبيانات</button>
-            <div style="display: flex; gap: 8px; width: 100%; justify-content: flex-end;">
+            <button id="btnResetMain" onclick="showResetModal()" class="btn-reset">⚠️ تصفير الكشف والبيانات</button>
+            <div style="display: flex; gap: 8px; width: 100%; justify-content: flex-end; flex-wrap: wrap;">
                 <button onclick="handleSaveButtonClick()" class="btn-save">💾 حفظ اليومية والتاريخ</button>
-                <button onclick="exportToExcel()" class="btn-excel">تصدير لـ Excel</button>
+                <button onclick="exportToPDF()" class="btn-pdf">📄 تصدير / حفظ PDF (أوفلاين)</button>
             </div>
         </div>
 
@@ -185,9 +182,7 @@
         <div class="modal-box modal-box-prod">
             <div class="modal-icon">📦</div>
             <div class="modal-title" style="color: #6d28d9;">إضافة صنف جديد للكشف</div>
-            <div class="modal-desc">
-                أدخل اسم الصنف والحجم المترادف معه. سيتم تثبيت هذا الصنف في الجدول ويمكنكِ حذفه لاحقاً عبر أيقونة السلة.
-            </div>
+            <div class="modal-desc">أدخل اسم الصنف والحجم المترادف معه.</div>
             <input type="text" id="newCatInput" placeholder="اسم الصنف (مثلاً: طبيعي، زبادي خفيف)" class="modal-input">
             <input type="text" id="newSizeInput" placeholder="الحجم / العبوة (مثلاً: 500g، عادي)" class="modal-input">
             <div class="modal-actions" style="flex-direction: row; gap: 8px;">
@@ -231,7 +226,7 @@
     <div class="modal-overlay" id="resetModal">
         <div class="modal-box modal-box-danger">
             <div class="modal-icon" style="color: #dc2626;">⚠️</div>
-            <div class="modal-title" style="color: #991b1b;">تنبيه:حذف الكشف!</div>
+            <div class="modal-title" style="color: #991b1b;">تنبيه: حذف الكشف!</div>
             <div class="modal-desc">
                 هل أنت متأكد من مسح الأعداد، الأسعار، وأسماء العملاء الحالية؟<br>
                 <strong>ملاحظة:</strong> اليوميات المحفوظة سابقاً لن تتأثر بهذا التصفير.
@@ -399,7 +394,7 @@
 
                     showAlertModal(
                         `⚠️ تنبيه: سعر الصنف غير مسبق!`, 
-                        `لا يمكنك كتابة أعداد مبيعات لصنف "${products[pIdx].cat} (${products[pIdx].size})" قبل تحديد سعر القطعة في خانة الأسعارأولاً.`
+                        `لا يمكنك كتابة أعداد مبيعات لصنف "${products[pIdx].cat} (${products[pIdx].size})" قبل تحديد سعر القطعة أولاً.`
                     );
                     saveCurrentState();
                     calculateTotals();
@@ -416,7 +411,7 @@
 
                     showAlertModal(
                         `⚠️ تنبيه: عميل #${colIndex} بدون اسم!`, 
-                        `الرجاء كتابة اسم المحل أو العميل في أعلى العمود (#${colIndex}) أولاً قبل إدخال الأعداد.`
+                        `الرجاء كتابة اسم المحل أو العميل في أعلى العمود (#${colIndex}) أولاً.`
                     );
                     saveCurrentState();
                     calculateTotals();
@@ -431,7 +426,7 @@
             calculateTotals();
         }
 
-        function showAlertModal(title, desc, icon = "⚠️") {
+        function showAlertModal(title, desc, icon = "⚠") {
             document.getElementById('alertIcon').innerText = icon;
             document.getElementById('alertTitle').innerText = title;
             document.getElementById('alertDesc').innerText = desc;
@@ -455,7 +450,7 @@
 
             showAlertModal(
                 "💰 إجمالي مبيعات الكشف الكلي", 
-                `المبلغ الإجمالي الكلي لجميع العملاء في هذا الجدول هو:\n\n` +
+                `المبلغ الإجمالي الكلي لجميع العملاء هو:\n\n` +
                 ` ${grandTotal.toLocaleString()} جنيه سوداني `,
                 "💵"
             );
@@ -527,7 +522,7 @@
                 priceTd.style.backgroundColor = '#fefce8';
                 const unitPrice = priceData[pIdx] !== undefined ? priceData[pIdx] : '';
                 priceTd.innerHTML = `
-                    <input type="number" id="price_input_${pIdx}" value="${unitPrice}" placeholder=" ادخل السعر"
+                    <input type="number" id="price_input_${pIdx}" value="${unitPrice}" placeholder="ادخل السعر"
                         oninput="savePrice(${pIdx}, this.value)" class="cell-input" style="color: #1e3a8a;">
                 `;
                 tr.appendChild(priceTd);
@@ -557,7 +552,7 @@
                 td.className = "total-cell";
                 td.innerHTML = `
                     <div id="total_price_col_${c}">0</div>
-                    ${isLastCol ? `<button onclick="removeLastCustomerColumn()" class="btn-del-cust-footer" title="حذف العميل الأخير">🗑️ حذف العميل</button>` : ''}
+                    ${isLastCol ? `<button onclick="removeLastCustomerColumn()" class="btn-del-cust-footer" title="حذف العميل الأخير">🗑 حذف العميل</button>` : ''}
                 `;
                 footerRow.appendChild(td);
             }
@@ -593,7 +588,7 @@
                     if (hasSales) {
                         const nameInput = document.getElementById(`cust_name_input_${c}`);
                         if (nameInput) nameInput.classList.add('cust-input-error');
-                        showAlertModal("⚠️ توجد مبيعات بدون اسم عميل!", `العميل رقم #${c} يحتوي على مبيعات ولكنه بدون اسم. يرجى كتابة اسم العميل أولاً قبل متابعة التصدير أو الحفظ.`);
+                        showAlertModal("⚠️ توجد مبيعات بدون اسم عميل!", `العميل رقم #${c} يحتوي على مبيعات ولكنه بدون اسم. يرجى كتابة اسم العميل أولاً.`);
                         return false;
                     }
                 }
@@ -723,6 +718,96 @@
             }
         }
 
+        /* --- تصدير أوفلاين كـ PDF متكامل بناءً على الطباعة المباشرة من المتصفح بدون إنترنت --- */
+        function exportToPDF() {
+            if (!checkUnnamedCustomersWithSales()) return;
+
+            const pageSize = 9; // 9 عملاء كحد أقصى للصفحة الواحدة
+            const printWin = window.open('', '_blank');
+            if (!printWin) {
+                alert("يرجى السماح بالنوافذ المنبثقة (Pop-ups) لتصدير وحفظ ملف الـ PDF!");
+                return;
+            }
+
+            let htmlContent = `
+            <!DOCTYPE html>
+            <html lang="ar" dir="rtl">
+            <head>
+                <meta charset="UTF-8">
+                <title>كشف مبيعات زبادي كابو</title>
+                <style>
+                    body { font-family: system-ui, sans-serif; direction: rtl; margin: 10px; color: #000; }
+                    .page-break { page-break-after: always; margin-bottom: 20px; }
+                    table { width: 100%; border-collapse: collapse; text-align: center; font-size: 10pt; margin-bottom: 10px; }
+                    th, td { border: 1px solid #333; padding: 4px; }
+                    th { background-color: #1e3a8a !important; color: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                    tfoot td { background-color: #0f172a !important; color: #facc15 !important; font-weight: bold; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                    .title { text-align: center; color: #1d4ed8; font-size: 14pt; font-weight: bold; margin-bottom: 8px; }
+                </style>
+            </head>
+            <body>`;
+
+            for (let startCust = 1; startCust <= customersCount; startCust += pageSize) {
+                const endCust = Math.min(startCust + pageSize - 1, customersCount);
+
+                htmlContent += `
+                <div class="${endCust < customersCount ? 'page-break' : ''}">
+                    <div class="title">كشف مبيعات زبادي كابو اليومي (العملاء من ${startCust} إلى ${endCust})</div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 140px;">الصنف / الحجم</th>
+                                <th style="width: 70px;">سعر القطعة</th>`;
+
+                for (let c = startCust; c <= endCust; c++) {
+                    const name = customerNames[c] ? customerNames[c].trim() : `عميل #${c}`;
+                    htmlContent += `<th>${name}</th>`;
+                }
+
+                htmlContent += `</tr></thead><tbody>`;
+
+                products.forEach((prod, pIdx) => {
+                    const unitPrice = priceData[pIdx] !== undefined ? priceData[pIdx] : '0';
+                    htmlContent += `<tr>
+                        <td style="text-align: right; font-weight: bold;">${prod.cat} (${prod.size})</td>
+                        <td style="background-color: #fefce8; -webkit-print-color-adjust: exact; font-weight: bold;">${unitPrice}</td>`;
+
+                    for (let c = startCust; c <= endCust; c++) {
+                        const qty = salesData[`${pIdx}_${c}`] !== undefined ? salesData[`${pIdx}_${c}`] : '-';
+                        htmlContent += `<td>${qty}</td>`;
+                    }
+                    htmlContent += `</tr>`;
+                });
+
+                htmlContent += `</tbody><tfoot><tr>
+                    <td><b>إجمالي العميل (ج)</b></td>
+                    <td></td>`;
+
+                for (let c = startCust; c <= endCust; c++) {
+                    let totalAmount = 0;
+                    products.forEach((_, pIdx) => {
+                        const qty = Number(salesData[`${pIdx}_${c}`]) || 0;
+                        const price = Number(priceData[pIdx]) || 0;
+                        totalAmount += (qty * price);
+                    });
+                    htmlContent += `<td><b>${totalAmount.toLocaleString()}</b></td>`;
+                }
+
+                htmlContent += `</tr></tfoot></table></div>`;
+            }
+
+            htmlContent += `
+            <script>
+                window.onload = function() {
+                    window.print();
+                };
+            <\/script>
+            </body></html>`;
+
+            printWin.document.write(htmlContent);
+            printWin.document.close();
+        }
+
         function showResetModal() { document.getElementById('resetModal').style.display = 'flex'; }
         function closeResetModal() { document.getElementById('resetModal').style.display = 'none'; }
 
@@ -733,75 +818,9 @@
             renderApp();
         }
 
-        function exportToExcel() {
-            if (!checkUnnamedCustomersWithSales()) return;
-
-            if (typeof XLSX === 'undefined') {
-                alert('لتصدير ملف Excel يتطلب اتصال بالإنترنت لتحميل المكتبة.');
-                return;
-            }
-
-            let excelRows = [];
-            
-            let headerRow = ['الصنف / الحجم', 'سعر القطعة (ج)'];
-            for (let c = 1; c <= customersCount; c++) {
-                const name = customerNames[c] ? `${customerNames[c].trim()} (${c})` : `عميل ${c}`;
-                headerRow.push(name);
-            }
-            excelRows.push(headerRow);
-
-            products.forEach((prod, pIdx) => {
-                const price = Number(priceData[pIdx]) || 0;
-                let row = [`${prod.cat} (${prod.size})`, price];
-                for (let c = 1; c <= customersCount; c++) {
-                    const key = `${pIdx}_${c}`;
-                    row.push(salesData[key] ? Number(salesData[key]) : 0);
-                }
-                excelRows.push(row);
-            });
-
-            let totalRow = ['إجمالي العميل (جنيه)', '-'];
-            let grandTotal = 0;
-            for (let c = 1; c <= customersCount; c++) {
-                let sum = 0;
-                products.forEach((_, pIdx) => {
-                    const qty = Number(salesData[`${pIdx}_${c}`]) || 0;
-                    const price = Number(priceData[pIdx]) || 0;
-                    sum += (qty * price);
-                });
-                totalRow.push(sum);
-                grandTotal += sum;
-            }
-            excelRows.push(totalRow);
-            
-            excelRows.push(['إجمالي المبيعات الكلي (جنيه)', grandTotal]);
-
-            const ws = XLSX.utils.aoa_to_sheet(excelRows);
-
-            if (!ws['!views']) ws['!views'] = [];
-            ws['!views'].push({ RTL: true });
-
-            const colWidths = excelRows[0].map((_, colIndex) => {
-                let maxLen = 12;
-                excelRows.forEach(row => {
-                    const val = row[colIndex] !== undefined ? String(row[colIndex]) : '';
-                    if (val.length > maxLen) {
-                        maxLen = val.length;
-                    }
-                });
-                return { wch: maxLen + 4 };
-            });
-            ws['!cols'] = colWidths;
-
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "كشف المبيعات اليومي");
-            
-            const dateStr = new Date().toISOString().slice(0, 10);
-            XLSX.writeFile(wb, `مبيعات_كابو_${dateStr}.xlsx`);
-        }
-
         window.onload = renderApp;
     </script>
 </body>
 </html>
 
+ 
