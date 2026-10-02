@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -159,7 +159,8 @@
                 <tbody id="tableBody"></tbody>
                 <tfoot>
                     <tr id="tableFooterRow">
-                        <td colspan="2" class="footer-sticky">إجمالي العميل (ج)</td>
+                        <td colspan="1" class="footer-sticky">إجمالي العميل (ج)</td>
+                        <td style="background: #0f172a; border-color: #94a3b8;"></td>
                     </tr>
                 </tfoot>
             </table>
@@ -185,7 +186,7 @@
             <div class="modal-icon">📦</div>
             <div class="modal-title" style="color: #6d28d9;">إضافة صنف جديد للكشف</div>
             <div class="modal-desc">
-                أدخلي اسم الصنف والحجم المترادف معه. سيتم تثبيت هذا الصنف في الجدول ويمكنكِ حذفه لاحقاً عبر أيقونة السلة.
+                أدخل اسم الصنف والحجم المترادف معه. سيتم تثبيت هذا الصنف في الجدول ويمكنكِ حذفه لاحقاً عبر أيقونة السلة.
             </div>
             <input type="text" id="newCatInput" placeholder="اسم الصنف (مثلاً: طبيعي، زبادي خفيف)" class="modal-input">
             <input type="text" id="newSizeInput" placeholder="الحجم / العبوة (مثلاً: 500g، عادي)" class="modal-input">
@@ -201,7 +202,7 @@
         <div class="modal-box modal-box-save">
             <div class="modal-icon">💾</div>
             <div class="modal-title" style="color: #1e40af;">خيارات حفظ التعديلات</div>
-            <div class="modal-desc" id="saveOptionsDesc">ترغبين في حفظ التغييرات الحالية على اليومية:</div>
+            <div class="modal-desc" id="saveOptionsDesc">ترغب في حفظ التغييرات الحالية على اليومية:</div>
             <div class="modal-actions">
                 <button onclick="confirmOverwriteRecord()" class="btn-modal-overwrite">
                     🔄 حفظ وتحديث في نفس الجدول (<span id="currentRecordNameSpan"></span>)
@@ -230,14 +231,14 @@
     <div class="modal-overlay" id="resetModal">
         <div class="modal-box modal-box-danger">
             <div class="modal-icon" style="color: #dc2626;">⚠️</div>
-            <div class="modal-title" style="color: #991b1b;">تنبيه: تصفير الكشف الحاضر!</div>
+            <div class="modal-title" style="color: #991b1b;">تنبيه:حذف الكشف!</div>
             <div class="modal-desc">
-                هل أنتِ متأكدة من مسح الأعداد، الأسعار، وأسماء العملاء الحالية؟<br>
+                هل أنت متأكد من مسح الأعداد، الأسعار، وأسماء العملاء الحالية؟<br>
                 <strong>ملاحظة:</strong> اليوميات المحفوظة سابقاً لن تتأثر بهذا التصفير.
             </div>
             <div class="modal-actions" style="flex-direction: row; gap: 8px;">
                 <button onclick="closeResetModal()" class="btn-modal-cancel" style="flex: 1;">إلغاء</button>
-                <button onclick="confirmClearAllData()" class="btn-modal-confirm" style="flex: 1;">نعم، تصفير الكشف</button>
+                <button onclick="confirmClearAllData()" class="btn-modal-confirm" style="flex: 1;">نعم، حذف الكشف</button>
             </div>
         </div>
     </div>
@@ -284,7 +285,7 @@
             const lastIndex = customersCount;
             const lastName = customerNames[lastIndex] ? customerNames[lastIndex].trim() : `عميل #${lastIndex}`;
 
-            if (confirm(`هل أنت متأكدة من حذف العمود الأخير (${lastName})؟`)) {
+            if (confirm(`هل أنت متأكد من حذف العمود الأخير (${lastName})؟`)) {
                 delete customerNames[lastIndex];
                 products.forEach((_, pIdx) => {
                     delete salesData[`${pIdx}_${lastIndex}`];
@@ -441,7 +442,6 @@
             document.getElementById('alertModal').style.display = 'none';
         }
 
-        /* --- دالة حساب المجموع الكلي للجدول بالكامل --- */
         function calculateGrandTotal() {
             let grandTotal = 0;
             for (let c = 1; c <= customersCount; c++) {
@@ -527,7 +527,7 @@
                 priceTd.style.backgroundColor = '#fefce8';
                 const unitPrice = priceData[pIdx] !== undefined ? priceData[pIdx] : '';
                 priceTd.innerHTML = `
-                    <input type="number" id="price_input_${pIdx}" value="${unitPrice}" placeholder="السعر"
+                    <input type="number" id="price_input_${pIdx}" value="${unitPrice}" placeholder=" ادخل السعر"
                         oninput="savePrice(${pIdx}, this.value)" class="cell-input" style="color: #1e3a8a;">
                 `;
                 tr.appendChild(priceTd);
@@ -546,7 +546,10 @@
             });
 
             const footerRow = document.getElementById('tableFooterRow');
-            footerRow.innerHTML = `<td colspan="2" class="footer-sticky">إجمالي العميل (ج)</td>`;
+            footerRow.innerHTML = `
+                <td colspan="1" class="footer-sticky">إجمالي العميل (ج)</td>
+                <td style="background: #0f172a; border-color: #94a3b8;"></td>
+            `;
             for (let c = 1; c <= customersCount; c++) {
                 const td = document.createElement('td');
                 const isLastCol = (c === customersCount);
@@ -665,7 +668,7 @@
             const dateStr = now.toLocaleDateString('ar-EG', { year: 'numeric', month: '2-digit', day: '2-digit' });
             const timeStr = now.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
             
-            let recordName = prompt("أدخلي اسم اليومية أو التاريخ للنسخة الجديدة:", `يومية ${dateStr} - ${timeStr}`);
+            let recordName = prompt("أدخل اسم اليومية أو التاريخ للنسخة الجديدة:", `يومية ${dateStr} - ${timeStr}`);
             if (!recordName) return;
 
             savedRecords[recordName] = {
@@ -730,7 +733,6 @@
             renderApp();
         }
 
-        /* --- دالة تصدير ملف إكسل المنظمة والمرتبة --- */
         function exportToExcel() {
             if (!checkUnnamedCustomersWithSales()) return;
 
@@ -741,7 +743,6 @@
 
             let excelRows = [];
             
-            // 1. صف العناوين الرئيسية
             let headerRow = ['الصنف / الحجم', 'سعر القطعة (ج)'];
             for (let c = 1; c <= customersCount; c++) {
                 const name = customerNames[c] ? `${customerNames[c].trim()} (${c})` : `عميل ${c}`;
@@ -749,7 +750,6 @@
             }
             excelRows.push(headerRow);
 
-            // 2. صفوف الأصناف والأسعار والمبيعات
             products.forEach((prod, pIdx) => {
                 const price = Number(priceData[pIdx]) || 0;
                 let row = [`${prod.cat} (${prod.size})`, price];
@@ -760,7 +760,6 @@
                 excelRows.push(row);
             });
 
-            // 3. صف إجمالي مبيعات كل عميل
             let totalRow = ['إجمالي العميل (جنيه)', '-'];
             let grandTotal = 0;
             for (let c = 1; c <= customersCount; c++) {
@@ -775,19 +774,15 @@
             }
             excelRows.push(totalRow);
             
-            // 4. صف إجمالي اليومية الكلي المجمع
             excelRows.push(['إجمالي المبيعات الكلي (جنيه)', grandTotal]);
 
-            // إنشاء ورقة العمل
             const ws = XLSX.utils.aoa_to_sheet(excelRows);
 
-            // تفعيل الاتجاه من اليمين إلى اليسار (RTL) لسهولة القراءة بأسلوب سلس
             if (!ws['!views']) ws['!views'] = [];
             ws['!views'].push({ RTL: true });
 
-            // ضبط عرض الأعمدة تلقائياً ليكون مريحاً ومناسباً لكل المحتويات
             const colWidths = excelRows[0].map((_, colIndex) => {
-                let maxLen = 12; // الحد الأدنى لعرض العمود
+                let maxLen = 12;
                 excelRows.forEach(row => {
                     const val = row[colIndex] !== undefined ? String(row[colIndex]) : '';
                     if (val.length > maxLen) {
@@ -798,7 +793,6 @@
             });
             ws['!cols'] = colWidths;
 
-            // تصدير وتحميل الملف
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "كشف المبيعات اليومي");
             
