@@ -20,7 +20,7 @@
         .btn-back-main:hover { background: #15803d; }
         
         .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
-        .btn-add { background: #2563eb; color: #fff; border: none; padding: 8px 14px; border-radius: 10px; font-weight: bold; font-size: 12px; cursor: pointer; }
+        .btn-add { background: #2563eb; color: #fff; border: none; padding: 8px 8px; border-radius: 10px; font-weight: bold; font-size: 12px; cursor: pointer; }
         .btn-add-prod { background: #7c3aed; color: #fff; border: none; padding: 8px 14px; border-radius: 10px; font-weight: bold; font-size: 12px; cursor: pointer; }
         .btn-add-prod:hover { background: #6d28d9; }
         .btn-grand-total { background: #059669; color: #fff; border: none; padding: 8px 14px; border-radius: 10px; font-weight: bold; font-size: 12px; cursor: pointer; }
@@ -76,9 +76,14 @@
         @media (min-width: 640px) { .actions { flex-direction: row; justify-content: space-between; } }
         
         .btn-reset { background: #fff1f2; color: #be123c; border: 1px solid #fda4af; padding: 8px 16px; border-radius: 10px; font-weight: bold; font-size: 12px; cursor: pointer; }
-        .btn-save { background: #0284c7; color: #fff; border: none; padding: 10px 18px; border-radius: 10px; font-weight: 900; font-size: 13px; cursor: pointer; }
-        .btn-pdf { background: #dc2626; color: #fff; border: none; padding: 10px 18px; border-radius: 10px; font-weight: 900; font-size: 13px; cursor: pointer; transition: background 0.2s; }
-        .btn-pdf:hover { background: #b91c1c; }
+        
+        /* تعديل لون زر الحفظ للأخضر */
+        .btn-save { background: #16a34a; color: #fff; border: none; padding: 10px 18px; border-radius: 10px; font-weight: 900; font-size: 13px; cursor: pointer; transition: background 0.2s; }
+        .btn-save:hover { background: #15803d; }
+
+        /* تعديل لون زر التصدير للأزرق */
+        .btn-pdf { background: #2563eb; color: #fff; border: none; padding: 10px 18px; border-radius: 10px; font-weight: 900; font-size: 13px; cursor: pointer; transition: background 0.2s; }
+        .btn-pdf:hover { background: #1d4ed8; }
 
         .records-section { margin-top: 20px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 12px; padding: 14px; }
         .records-header { font-size: 14px; font-weight: 800; color: #334155; margin-bottom: 10px; }
@@ -105,10 +110,12 @@
         .btn-modal-overwrite { background: #0284c7; color: #fff; border: none; padding: 10px 14px; border-radius: 8px; font-weight: bold; font-size: 12px; cursor: pointer; }
         .btn-modal-saveas { background: #16a34a; color: #fff; border: none; padding: 10px 14px; border-radius: 8px; font-weight: bold; font-size: 12px; cursor: pointer; }
         .btn-modal-prod { background: #7c3aed; color: #fff; border: none; padding: 8px 16px; border-radius: 8px; font-weight: bold; font-size: 12px; cursor: pointer; }
+        
+        .btn-modal-confirm { background: #dc2626; color: #ffffff; border: none; padding: 8px 16px; border-radius: 8px; font-weight: bold; font-size: 12px; cursor: pointer; transition: background 0.2s; }
+        .btn-modal-confirm:hover { background: #b91c1c; }
 
         .modal-input { width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; margin-bottom: 10px; text-align: center; }
 
-        /* تنسيقات الطباعة الأصلية بدون الحاجة لمكتبات خارجية */
         @media print {
             body { background: white; padding: 0; margin: 0; }
             .card { border: none; box-shadow: none; padding: 0; margin: 0; }
@@ -164,15 +171,18 @@
         </div>
 
         <div class="actions">
-            <button id="btnResetMain" onclick="showResetModal()" class="btn-reset">⚠️ حذف الكشف والبيانات</button>
+            <button id="btnResetMain" onclick="showResetModal()" class="btn-reset">
+               حذف الكشف والبيانات</button>
             <div style="display: flex; gap: 8px; width: 100%; justify-content: flex-end; flex-wrap: wrap;">
-                <button onclick="handleSaveButtonClick()" class="btn-save">💾 حفظ اليومية والتاريخ</button>
-                <button onclick="exportToPDF()" class="btn-pdf">📄 تصدير / حفظ PDF (أوفلاين)</button>
+                <!-- زر الحفظ أصبح بالأخضر وعلى اليمين أولاً -->
+                <button onclick="handleSaveButtonClick()" class="btn-save"> حفظ اليومية والتاريخ</button>
+                <!-- زر التصدير أصبح باللون الأزرق -->
+                <button onclick="exportToPDF()" class="btn-pdf">تصدير / حفظ PDF </button>
             </div>
         </div>
 
         <div class="records-section">
-            <div class="records-header">📂 اليوميات والسجلات المحفوظة سابقاً:</div>
+            <div class="records-header"> اليوميات والسجلات المحفوظة سابقاً:</div>
             <div class="records-list" id="recordsList"></div>
         </div>
     </div>
@@ -233,7 +243,7 @@
             </div>
             <div class="modal-actions" style="flex-direction: row; gap: 8px;">
                 <button onclick="closeResetModal()" class="btn-modal-cancel" style="flex: 1;">إلغاء</button>
-                <button onclick="confirmClearAllData()" class="btn-modal-confirm" style="flex: 1;">نعم، حذف الكشف</button>
+                <button onclick="confirmClearAllData()" class="btn-modal-confirm" style="flex: 1;"> حذف </button>
             </div>
         </div>
     </div>
@@ -393,7 +403,7 @@
                     if (priceInput) priceInput.classList.add('price-input-error');
 
                     showAlertModal(
-                        `⚠️ تنبيه: سعر الصنف غير مسبق!`, 
+                        `⚠️️ تنبيه: سعر الصنف غير موجود!`, 
                         `لا يمكنك كتابة أعداد مبيعات لصنف "${products[pIdx].cat} (${products[pIdx].size})" قبل تحديد سعر القطعة أولاً.`
                     );
                     saveCurrentState();
@@ -470,7 +480,7 @@
             const resetBtn = document.getElementById('btnResetMain');
 
             if (currentRecordKey) {
-                tag.innerText = `📁 معروض حالياً السجل: [ ${currentRecordKey} ]`;
+                tag.innerText = `معروض حالياً السجل: [ ${currentRecordKey} ]`;
                 tag.className = "subtitle subtitle-old";
                 backBar.style.display = 'flex';
                 resetBtn.style.display = 'none';
@@ -718,11 +728,10 @@
             }
         }
 
-        /* --- تصدير أوفلاين كـ PDF متكامل بناءً على الطباعة المباشرة من المتصفح بدون إنترنت --- */
         function exportToPDF() {
             if (!checkUnnamedCustomersWithSales()) return;
 
-            const pageSize = 9; // 9 عملاء كحد أقصى للصفحة الواحدة
+            const pageSize = 9;
             const printWin = window.open('', '_blank');
             if (!printWin) {
                 alert("يرجى السماح بالنوافذ المنبثقة (Pop-ups) لتصدير وحفظ ملف الـ PDF!");
@@ -823,4 +832,3 @@
 </body>
 </html>
 
- 
